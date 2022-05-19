@@ -43,16 +43,12 @@ def show_all_pokemons(request):
             add_pokemon(
                 folium_map, pokemon_entity.lat,
                 pokemon_entity.lon,
-                pokemon.image.path if pokemon.image else ''
+                pokemon.image.path if pokemon.image else DEFAULT_IMAGE_URL
             )
 
     pokemons_on_page = []
     for pokemon in pokemons:
-        pokemons_on_page.append({
-            'pokemon_id': pokemon.id,
-            'img_url': pokemon.image.url if pokemon.image else '',
-            'title_ru': pokemon.title,
-        })
+        pokemons_on_page.append(get_pokemon_data_basic(pokemon))
 
     return render(request, 'mainpage.html', context={
         'map': folium_map._repr_html_(),
@@ -77,11 +73,34 @@ def show_pokemon(request, pokemon_id):
             pokemon_entity.lon,
             requested_pokemon.image.path if requested_pokemon.image else ''
         )
-    pokemon_on_page = {
-        'pokemon_id': requested_pokemon.id,
-        'img_url': requested_pokemon.image.url if requested_pokemon.image else '',
-        'title_ru': requested_pokemon.title,
-    }
     return render(request, 'pokemon.html', context={
-        'map': folium_map._repr_html_(), 'pokemon': pokemon_on_page
+        'map': folium_map._repr_html_(),
+        'pokemon': get_pokemon_data_full(requested_pokemon)
     })
+
+
+def get_pokemon_data_full(pokemon):
+
+    pokemon_data = {
+        'pokemon_id': pokemon.id,
+        'img_url': pokemon.image.url if pokemon.image else DEFAULT_IMAGE_URL,
+        'title_ru': pokemon.title,
+        'title_en': pokemon.title_en,
+        'title_jp': pokemon.title_jp,
+        'description': pokemon.description,
+    }
+    if pokemon.next_evolution:
+        pokemon_data['next_evolution'] = get_pokemon_data_basic(pokemon.next_evolution)
+    previous_evolution = pokemon.previous_evolution.all().first()
+    if previous_evolution:
+        pokemon_data['previous_evolution'] = get_pokemon_data_basic(previous_evolution)
+    return pokemon_data
+
+
+def get_pokemon_data_basic(pokemon):
+    pokemon_data = {
+        'pokemon_id': pokemon.id,
+        'img_url': pokemon.image.url if pokemon.image else DEFAULT_IMAGE_URL,
+        'title_ru': pokemon.title,
+    }
+    return pokemon_data
