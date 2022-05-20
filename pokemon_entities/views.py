@@ -91,7 +91,7 @@ def get_pokemon_data_full(pokemon):
     }
     if pokemon.next_evolution:
         pokemon_data['next_evolution'] = get_pokemon_data_basic(pokemon.next_evolution)
-    previous_evolution = pokemon.previous_evolution.all().first()
+    previous_evolution = pokemon.previous_evolutions.all().first()
     if previous_evolution:
         pokemon_data['previous_evolution'] = get_pokemon_data_basic(previous_evolution)
     return pokemon_data
